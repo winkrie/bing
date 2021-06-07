@@ -66,8 +66,13 @@ class Bing:
                     if not img_name:
                         continue
                     filename = os.path.join(path, img_name + '.jpg')
-                    if os.path.exists(filename):
-                        continue
+                    try:
+                        mtime = os.path.getmtime(filename)
+                        time_local = time.localtime(mtime)
+                        if time.strftime('%H:%M:%S', time_local) == '00:00:00':
+                            continue
+                    except os.error:
+                        pass
                     img_url = item['url'] if item['url'].find('http') == 0 else (self.host + item['url'])
                     self.__download(img_url, filename, item['startdate'])
             except urllib2.URLError, e:
