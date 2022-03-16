@@ -2,14 +2,14 @@
 
 import time
 import os
-import urllib2
+import urllib.request, urllib.error
 import json
 import contextlib
 import shutil
 
 
 class Bing:
-    host = 'http://cn.bing.com'
+    host = 'https://cn.bing.com'
     url_tpl = '%s/HPImageArchive.aspx?format=js&uhd=1&uhdwidth=%d&uhdheight=%d&idx=%d&n=%d&nc=%d'
     uhdwidth = 3840
     uhdheight = 2160
@@ -36,16 +36,16 @@ class Bing:
 
     @staticmethod
     def __download(url, filename, datetime=0):
-        print url, '=>', filename
+        print(url, '=>', filename)
         try:
-            with contextlib.closing(urllib2.urlopen(url)) as res, open(filename, 'wb') as f:
+            with contextlib.closing(urllib.request.urlopen(url)) as res, open(filename, 'wb') as f:
                 shutil.copyfileobj(res, f)
             if datetime:
                 datetime = int(time.mktime(time.strptime(str(datetime), '%Y%m%d')))
                 os.utime(filename, (datetime, datetime))
             return True
-        except urllib2.URLError, e:
-            print e.reason
+        except urllib.error.URLError as e:
+            print(e.reason)
             return False
 
     def save(self, path):
@@ -54,7 +54,7 @@ class Bing:
         for en in self.ensearch:
             url = self.server_url + '&ensearch=' + str(en)
             try:
-                with contextlib.closing(urllib2.urlopen(url)) as res:
+                with contextlib.closing(urllib.request.urlopen(url)) as res:
                     content = res.read()
                 if not content:
                     continue
@@ -75,5 +75,5 @@ class Bing:
                         pass
                     img_url = item['url'] if item['url'].find('http') == 0 else (self.host + item['url'])
                     self.__download(img_url, filename, item['startdate'])
-            except urllib2.URLError, e:
-                print e.reason
+            except urllib.error.URLError as e:
+                print(e.reason)
